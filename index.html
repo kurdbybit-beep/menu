@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECH ENERGY | Digital Catalog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #0ea5e9; 
+            --accent: #10b981;  
+            --card-bg: rgba(15, 23, 42, 0.7); 
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            margin: 0; padding-bottom: 50px; min-height: 100vh; color: #fff;
+            background: linear-gradient(rgba(2, 6, 23, 0.9), rgba(2, 6, 23, 0.9)), 
+                        url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+
+        .top-nav { display: flex; gap: 10px; padding: 15px 20px; position: fixed; width: 100%; top: 0; z-index: 1000; justify-content: flex-end; }
+        .nav-btn { position: relative; cursor: pointer; background: rgba(14, 165, 233, 0.2); padding: 10px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--glass-border); display: flex; align-items: center; }
+        #cart-count { position: absolute; top: -5px; right: -5px; background: var(--accent); color: #fff; font-size: 0.75rem; font-weight: 900; padding: 2px 7px; border-radius: 50%; }
+
+        header { padding: 100px 20px 30px; text-align: center; }
+        header h1 { font-size: 2.5rem; color: var(--primary); font-weight: 900; margin: 0; letter-spacing: 2px; }
+        .social-links { margin-top: 15px; display: flex; justify-content: center; gap: 20px; }
+        .social-links a { color: #fff; font-size: 1.8rem; transition: 0.3s; opacity: 0.8; }
+
+        .categories-container { position: sticky; top: 0; z-index: 100; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); padding: 15px 10px; overflow-x: auto; display: flex; gap: 12px; border-bottom: 1px solid var(--glass-border); }
+        .cat-btn { padding: 10px 25px; background: rgba(255,255,255,0.05); border-radius: 50px; cursor: pointer; border: 1px solid var(--glass-border); white-space: nowrap; color: #ccc; transition: 0.3s; }
+        .cat-btn.active { background: var(--primary); color: #fff; font-weight: 700; border-color: var(--primary); }
+
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 15px; }
+        .food-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); backdrop-filter: blur(5px); display: flex; flex-direction: column; position: relative; }
+        .food-img { width: 100%; height: 150px; background-size: cover; background-position: center; }
+        .food-info { padding: 15px; text-align: center; }
+        .price-tag { background: var(--accent); color: #fff; padding: 5px 12px; border-radius: 12px; font-weight: 900; font-size: 0.85rem; }
+
+        .add-btn { position: absolute; top: 10px; left: 10px; background: var(--primary); color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; z-index: 10; }
+
+        #cart-panel { position: fixed; top: 0; right: -350px; width: 340px; max-width: 90%; height: 100%; background: #0f172a; z-index: 2000; transition: 0.4s; padding: 25px; display: flex; flex-direction: column; }
+        #cart-panel.open { right: 0; }
+        #cart-list { flex-grow: 1; overflow-y: auto; margin: 20px 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--glass-border); }
+        .qty-controls { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 10px; }
+        .qty-btn { cursor: pointer; color: var(--primary); }
+
+        /* ستایلا مۆدالا باژێران */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 25px; text-align: center; border: 1px solid var(--primary); width: 300px; }
+        .city-btn { width: 100%; padding: 15px; margin: 10px 0; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
+        .zakho-btn { background: #3b82f6; color: white; }
+        .duhok-btn { background: #8b5cf6; color: white; }
+
+        .clear-btn { width: 100%; padding: 15px; background: #ef4444; color: #fff; border: none; border-radius: 12px; cursor: pointer; margin-top: 10px; }
+        .order-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <div class="nav-btn" onclick="toggleCart()"><i class="fas fa-bolt fa-lg" style="color: var(--primary);"></i><span id="cart-count">0</span></div>
+    <div class="nav-btn" onclick="toggleLang()"><i class="fas fa-globe fa-lg" style="color: var(--accent);"></i></div>
+</div>
+
+<header>
+    <h1>TECH ENERGY</h1>
+    <div class="social-links">
+        <a href="https://www.instagram.com/__tech_.ai._?igsh=MTZ2ZGIxcXB2YjVjaw%3D%3D&utm_source=qr" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@_tech_ai_?_r=1&_t=ZS-96F7xvMB0zP" target="_blank"><i class="fab fa-tiktok"></i></a>
+    </div>
+</header>
+
+<!-- مۆدالا باژێران -->
+<div id="city-modal" class="modal">
+    <div class="modal-content">
+        <h3>باژێرێ خۆ هەلبژێرە</h3>
+        <button class="city-btn zakho-btn" onclick="sendOrder('zakho')">زاخۆ</button>
+        <button class="city-btn duhok-btn" onclick="sendOrder('duhok')">دهۆک</button>
+        <button onclick="toggleCityModal(false)" style="background:none; border:none; color:white; margin-top:10px; cursor:pointer;">پاشگەزبوون</button>
+    </div>
+</div>
+
+<div id="cart-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="cart-title">داخوازیا من</h2>
+        <i class="fas fa-times fa-lg" onclick="toggleCart()" style="cursor:pointer"></i>
+    </div>
+    <div id="cart-list"></div>
+    <div style="border-top: 1px solid #333; padding-top: 20px;">
+        <h3 style="text-align:center;"><span id="total-text">کۆم</span>: <span id="total-price" style="color:var(--accent)">0</span></h3>
+        <button class="order-btn" onclick="toggleCityModal(true)" id="btn-order">داوا بکە</button>
+        <button class="clear-btn" onclick="clearCart()" id="btn-clear">پاککرنا سەلکێ</button>
+    </div>
+</div>
+
+<div id="lang-modal" class="modal" onclick="toggleLang(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>زمان هەلبژێرە</h3>
+        <div style="background:rgba(255,255,255,0.05); padding:15px; margin:10px 0; border-radius:15px; cursor:pointer;" onclick="setLang('ku')">کوردی</div>
+        <div style="background:rgba(255,255,255,0.05); padding:15px; margin:10px 0; border-radius:15px; cursor:pointer;" onclick="setLang('ar')">العربية</div>
+    </div>
+</div>
+
+<div class="categories-container" id="catBar"></div>
+<div id="loader" style="text-align:center; padding:50px;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+<div id="menuContent"></div>
+
+<script>
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTp62O3unm8bNGD9jMfNnz6UvUOiSJXnaS05lbDV7q8xj7g0FQtQG9Ko1YTRap2JAz7jtWjRhJG6npY/pub?output=csv';
+    let dataList = [], cart = [], currentLang = 'ku';
+
+    async function loadData() {
+        try {
+            const res = await fetch(csvUrl);
+            const txt = await res.text();
+            const rows = txt.split('\n').slice(1);
+            dataList = rows.map(r => {
+                const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/"/g, '').trim());
+                return c.length >= 4 ? { name_en: c[0], price: c[1], img: c[2], cat: c[3], name_ku: c[4] || c[0], name_ar: c[5] || c[0] } : null;
+            }).filter(i => i);
+            document.getElementById('loader').style.display = 'none';
+            renderMenu();
+        } catch (e) { console.log(e); }
+    }
+
+    function renderMenu() {
+        const catBar = document.getElementById('catBar');
+        const menuContent = document.getElementById('menuContent');
+        catBar.innerHTML = ''; menuContent.innerHTML = '';
+        const cats = [...new Set(dataList.map(i => i.cat))];
+        cats.forEach((cat, index) => {
+            const btn = document.createElement('div');
+            btn.className = `cat-btn ${index === 0 ? 'active' : ''}`;
+            btn.innerText = cat;
+            btn.onclick = () => switchCat(cat, btn);
+            catBar.appendChild(btn);
+            const section = document.createElement('div');
+            section.id = `section-${cat.replace(/\s+/g, '-')}`;
+            section.className = `menu-section ${index === 0 ? 'active' : ''}`;
+            section.style.display = index === 0 ? 'block' : 'none';
+            const grid = document.createElement('div');
+            grid.className = 'food-grid';
+            dataList.filter(f => f.cat === cat).forEach(item => {
+                const name = currentLang === 'ku' ? item.name_ku : item.name_ar;
+                grid.innerHTML += `<div class="food-card">
+                    <button class="add-btn" onclick="addToCart('${item.name_en.replace(/'/g, "\\'")}')"><i class="fas fa-plus"></i></button>
+                    <div class="food-img" style="background-image: url('${item.img}')"></div>
+                    <div class="food-info"><h3>${name}</h3><span class="price-tag">${item.price}</span></div>
+                </div>`;
+            });
+            section.appendChild(grid);
+            menuContent.appendChild(section);
+        });
+    }
+
+    function addToCart(nameEn) {
+        const item = dataList.find(i => i.name_en === nameEn);
+        const exist = cart.find(i => i.name_en === nameEn);
+        if (exist) exist.qty += 1; else cart.push({ ...item, qty: 1 });
+        updateCartUI();
+    }
+
+    function removeFromCart(index) {
+        if (cart[index].qty > 1) cart[index].qty -= 1; else cart.splice(index, 1);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-list');
+        const count = document.getElementById('cart-count');
+        const totalEl = document.getElementById('total-price');
+        let total = 0;
+        list.innerHTML = '';
+        cart.forEach((item, i) => {
+            const p = parseInt(item.price.replace(/[^0-9]/g, '')) || 0;
+            total += p * item.qty;
+            list.innerHTML += `<div class="cart-item">
+                <div style="flex:1;"><b>${currentLang === 'ku' ? item.name_ku : item.name_ar}</b><br><small>${item.price}</small></div>
+                <div class="qty-controls">
+                    <i class="fas fa-minus-circle qty-btn" onclick="removeFromCart(${i})"></i>
+                    <span>${item.qty}</span>
+                    <i class="fas fa-plus-circle qty-btn" onclick="addToCart('${item.name_en}')"></i>
+                </div>
+            </div>`;
+        });
+        count.innerText = cart.reduce((a, b) => a + b.qty, 0);
+        totalEl.innerText = total.toLocaleString() + " IQD";
+    }
+
+    function sendOrder(city) {
+        if (cart.length === 0) return alert("سەلک ڤالایە!");
+        
+        let invoice = "🧾 *بسولەیا داخوازیا نوو*\n\n";
+        let total = 0;
+        
+        cart.forEach(item => {
+            const p = parseInt(item.price.replace(/[^0-9]/g, '')) || 0;
+            const sub = p * item.qty;
+            total += sub;
+            invoice += `▪️ ${item.name_ku}\n   ${item.qty} دانە × ${item.price}\n`;
+        });
+        
+        invoice += `\n💰 *کۆمێ گشتی:* ${total.toLocaleString()} IQD`;
+        invoice += `\n📍 *باژێر:* ${city === 'zakho' ? 'زاخۆ' : 'دهۆک'}`;
+        
+        const encoded = encodeURIComponent(invoice);
+        
+        if (city === 'zakho') {
+            window.open(`https://t.me/falahzakho?text=${encoded}`, '_blank');
+        } else {
+            // ئەڤە بۆ دهۆکێ یە (لینکێ تێلیگرامێ دهۆک لێرە دانێ)
+            window.open(`https://t.me/falahzakho?text=${encoded}`, '_blank'); 
+        }
+        
+        toggleCityModal(false);
+    }
+
+    function switchCat(cat, btn) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.menu-section').forEach(s => s.style.display = 'none');
+        document.getElementById(`section-${cat.replace(/\s+/g, '-')}`).style.display = 'block';
+    }
+
+    function toggleCart() { document.getElementById('cart-panel').classList.toggle('open'); }
+    function toggleCityModal(s) { document.getElementById('city-modal').style.display = s ? 'flex' : 'none'; }
+    function toggleLang(s = true) { document.getElementById('lang-modal').style.display = s ? 'flex' : 'none'; }
+    function clearCart() { cart = []; updateCartUI(); }
+
+    loadData();
+</script>
+</body>
+</html>
